@@ -1,0 +1,92 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row">
+  <div class="col col-8 offset-3 mt-3">
+    <h3><%= listing.title %></h3>
+  </div>
+
+  <div class="card col-6 offset-3 show-card listing-card">
+    <img src="<%= listing.image.url %>" class="card-img-top show-img" alt="listing_image">
+    <div class="card-body">
+      <p class="card-text"><i>Owned by <%= listing.owner.username %></i></p>
+      <p class="card-text"><%= listing.description %></p>
+      <p class="card-text">&#8377; <%= listing.price.toLocaleString("en-IN") %></p>
+      <p class="card-text"><%= listing.location %></p>
+      <p class="card-text"><%= listing.country %></p>
+    </div>
+  </div>
+
+  <% if (currUser && listing.owner._id.equals(currUser._id)) { %>
+    <div class="btns mt-3">
+      <a class="btn btn-dark col-1 offset-3 edit-btn" href="/listings/<%= listing._id %>/edit">Edit</a>
+      <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="d-inline">
+        <button class="btn btn-dark offset-1">Delete</button>
+      </form>
+    </div>
+  <% } %>
+
+  <div class="col-8 offset-3 mt-4">
+    <% if (currUser) { %>
+      <hr>
+      <h4>Leave a Review</h4>
+      <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate class="needs-validation">
+        <div class="mt-3 mb-3">
+          <label class="form-label" for="rating">Rating</label>
+          <fieldset class="starability-slot">
+            <% for (let i = 1; i <= 5; i++) { %>
+              <input type="radio" id="rate<%= i %>" name="review[rating]" value="<%= i %>" <%= i === 1 ? 'checked' : '' %> />
+              <label for="rate<%= i %>"><%= i %> star<%= i > 1 ? 's' : '' %></label>
+            <% } %>
+          </fieldset>
+        </div>
+        <div class="mt-3 mb-3">
+          <label class="form-label" for="comment">Comments</label>
+          <textarea required class="form-control" name="review[comment]" id="comment" cols="30" rows="5"></textarea>
+          <div class="invalid-feedback">Please leave a comment!</div>
+        </div>
+        <button class="btn btn-dark">Submit</button>
+      </form>
+      <hr>
+    <% } %>
+
+    <% if (listing.reviews.length > 0) { %>
+      <p><b>All Reviews</b></p>
+      <div class="row">
+        <% listing.reviews.forEach(review => { %>
+          <div class="card col-5 ms-3 mt-3 mb-3">
+            <div class="card-body">
+              <h5 class="card-title">@<%= review.author.username %></h5>
+              <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
+              <p class="card-text"><%= review.comment %></p>
+            </div>
+            <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" class="mb-3">
+              <button class="btn btn-sm btn-dark mt-2">Delete</button>
+            </form>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p>No reviews yet.</p>
+    <% } %>
+  </div>
+
+<!-- Map Container -->
+<div class="col-6 offset-3 mb-3">
+  <h3>Where you'll be</h3>
+  <div id="map" style="height: 400px;"></div>
+</div>
+
+<!-- CDN Links for MapLibre -->
+<link href="https://unpkg.com/maplibre-gl@3.3.1/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl@3.3.1/dist/maplibre-gl.js"></script>
+
+<!-- API Key to frontend -->
+<script>
+  window.mapToken = "<%= maptilerKey %>";
+</script>
+
+<!-- Your working map logic -->
+<script src="/js/map.js"></script>
+
+
+
